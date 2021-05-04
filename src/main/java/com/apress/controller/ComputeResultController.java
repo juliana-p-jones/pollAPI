@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -27,20 +26,19 @@ public class ComputeResultController {
     @Autowired
     private ComputeResultService computeResultService;
 
+    protected void verifyPoll(Long pollId) throws ResourceNotFoundException{
+        Optional<Poll> poll = pollService.getPoll(pollId);
+        if(!poll.isPresent()) {
+            throw new ResourceNotFoundException("Poll with id " + pollId + " not found");
+        }
+    }
+
     @RequestMapping(value = "/computeresult", method = RequestMethod.GET)
     public ResponseEntity<?> computeResult(@RequestParam Long pollId) {
+        verifyPoll(pollId);
         Iterable<Vote> allVotes = voteRepository.findByPoll(pollId);
         return new ResponseEntity<VoteResult>(computeResultService.computeResult(pollId), HttpStatus.OK);
     }
 
-
-
-//    @RequestMapping(value = "/polls/{pollId}", method = RequestMethod.GET)
-//    public ResponseEntity<?> getPoll(@PathVariable Long pollId){
-//        Optional<Poll> p = pollService.getPoll(pollId);
-//        if(!p.isPresent()) {
-//            throw new ResourceNotFoundException("Poll with id " + pollId + " not found");}
-//        return new ResponseEntity<> (p, HttpStatus.OK);
-//    }
 }
 

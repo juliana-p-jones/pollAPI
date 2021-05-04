@@ -27,14 +27,6 @@ public class VoteController {
     @Autowired
     private PollService pollService;
 
-//    @RequestMapping(value = "/polls/{pollId}/votes", method = RequestMethod.POST)
-//    public ResponseEntity<?> createVote(@PathVariable Long pollId, @RequestBody Vote vote) {
-//        vote = voteRepository.save(vote);
-//        HttpHeaders responseHeaders = new HttpHeaders();
-//        responseHeaders.setLocation(ServletUriComponentsBuilder.
-//                fromCurrentRequest().path("/{id}").buildAndExpand(vote.getId()).toUri());
-//        return new ResponseEntity<>(null, responseHeaders, HttpStatus.CREATED);
-//    }
 protected void verifyPoll(Long pollId) throws ResourceNotFoundException{
     Optional<Poll> poll = pollService.getPoll(pollId);
     if(!poll.isPresent()) {
@@ -42,10 +34,10 @@ protected void verifyPoll(Long pollId) throws ResourceNotFoundException{
     }
 }
 
-    protected void verifyVote(Long id) throws ResourceNotFoundException {
-        Optional<Vote> vote = voteService.getVote(id);
+    protected void verifyVote(Long voteId) throws ResourceNotFoundException {
+        Optional<Vote> vote = voteService.getVote(voteId);
         if(!vote.isPresent()) {
-            throw new ResourceNotFoundException("Vote with id " + id + " not found");
+            throw new ResourceNotFoundException("Vote with id " + voteId + " not found");
         }
     }
 
@@ -53,12 +45,8 @@ protected void verifyPoll(Long pollId) throws ResourceNotFoundException{
     public ResponseEntity<?> createVote(@PathVariable Long pollId, @RequestBody Vote
             vote) {
         verifyPoll(pollId);
-        voteService.createVote(vote);
-        HttpHeaders responseHeaders = new HttpHeaders();
-        responseHeaders.setLocation(ServletUriComponentsBuilder.
-                fromCurrentRequest().path("/{pollId}").buildAndExpand(vote.getId()).toUri());
-
-        return new ResponseEntity<>(null, responseHeaders, HttpStatus.CREATED);
+        voteService.createVote(vote, pollId);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @RequestMapping(value="/polls/{pollId}/votes", method=RequestMethod.GET)
@@ -67,21 +55,11 @@ protected void verifyPoll(Long pollId) throws ResourceNotFoundException{
         return new ResponseEntity<>(voteService.getAllVotes(pollId), HttpStatus.OK);
     }
 
-//    @RequestMapping(value = "/polls/{pollId}/votes", method = RequestMethod.GET)
-//    public Iterable<Vote> getAllVotes(@PathVariable Long pollId) {
-//        pollService.verifyPoll(pollId);
-//        voteService.getAllVotes(pollId);
-//        return voteRepository.findByPoll(pollId);
-//    }
+    @RequestMapping(value = "/polls/votes/{voteId}", method = RequestMethod.DELETE)
+    public ResponseEntity<?> deleteVote(@PathVariable Long voteId){
+     verifyVote(voteId);
+        voteService.deleteVote(voteId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 
-//    @RequestMapping(value = "/polls/{pollId}/votes/{voteId}", method = RequestMethod.DELETE)
-//    public ResponseEntity<?> deleteVote(@PathVariable Long pollId, @PathVariable Long id){
-//        verifyVote(id);
-//        voteService.deleteVote(id);
-//        return new ResponseEntity<>(HttpStatus.OK);
-//    }
-//    @RequestMapping(value="/polls/{pollId}/votes", method=RequestMethod.GET)
-//    public Iterable<Vote> getAllVotes(@PathVariable Long pollId) {
-//        return voteRepository. findByPoll(pollId);
-//    }
 }
